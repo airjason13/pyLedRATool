@@ -11,6 +11,7 @@ from PyQt5.QtWidgets import (QApplication, QMainWindow, QDesktopWidget, QStyleFa
 from PyQt5.QtGui import QPalette, QColor, QBrush, QFont, QMovie, QPixmap, QPainter, QIcon, QKeySequence, QImage
 from PyQt5.QtCore import Qt, QTimer, QObject
 from globa_def import *
+import datetime
 import log_utils
 log = log_utils.logging_init(__file__)
 
@@ -20,6 +21,10 @@ class Client_Info_Widget(QWidget):
 		self.parent_widget = parent_widget
 		self.ip = ip
 		self.id = id
+		self._font = QFont()
+		self._fontScale = 1
+		self._font.setPixelSize(18 * self._fontScale)
+		self.setFont(self._font)
 		self.widget = QWidget(self)
 		self.gridlayout = QGridLayout(self.widget)
 		self.label_ip = QLabel(self.widget)
@@ -40,6 +45,13 @@ class Client_Info_Widget(QWidget):
 		self.label_message_info.setText(self.total_error_msg_info)
 
 		self.widget_client_image = Client_Image()
+
+		#write error log file
+		self.error_log_fileuri = os.getcwd() + "/"+ err_log_filename_prefix + self.ip + "_" + \
+		                          datetime.datetime.now().strftime("%Y%m%d-%H%M%S") + ".dat"
+		log.debug("self.error_log_fileuri : %s", self.error_log_fileuri)
+		self.error_log_file = open(self.error_log_fileuri, 'w')
+
 		#self.pixmap_pico = QPixmap(os.getcwd() + "/image/pico.png")
 		#self.label_image_pico = QLabel(self.widget)
 		#self.label_image_pico.setPixmap(self.pixmap_pico)
@@ -48,14 +60,18 @@ class Client_Info_Widget(QWidget):
 
 		self.gridlayout.addWidget(self.label_ip, 0, 0)
 		self.gridlayout.addWidget(self.label_id_info, 0, 1)
-		self.gridlayout.addWidget(self.label_recv_count, 1, 0)
-		self.gridlayout.addWidget(self.label_recv_msg, 1, 1)
+		self.gridlayout.addWidget(self.label_recv_count, 0, 2)
+		self.gridlayout.addWidget(self.label_recv_msg, 1, 0, 1, 3)
 		self.gridlayout.addWidget(self.label_message_info, 2, 0, 2, 3)
 		self.gridlayout.addWidget(self.widget_client_image, 2, 4)
 
 
 
 	def set_error_msg(self, str):
+		current_time = "@" +datetime.datetime.now().strftime("%Y%m%d-%H%M%S") + "\n"
+		str += current_time
+		self.error_log_file.write(str)
+		self.error_log_file.flush()
 		self.error_msg_info = str
 		self.total_error_msg_info += self.error_msg_info
 		self.label_message_info.setText(self.total_error_msg_info)
@@ -71,7 +87,7 @@ class Client_Info_Widget(QWidget):
 			status_list = recv_msg.split(",")
 			for status in status_list:
 				self.widget_client_image.clear_error_tag(status.split("=")[0])
-		self.label_recv_msg.setText("recv :" + recv_msg)
+		self.label_recv_msg.setText(recv_msg)
 		self.recv_count += 1
 		self.label_recv_count.setText("recv_count : " + str(self.recv_count))
 
@@ -195,7 +211,10 @@ class ScrollLabel(QScrollArea):
 
 		# making widget resizable
 		self.setWidgetResizable(True)
-
+		self._font = QFont()
+		self._fontScale = 1
+		self._font.setPixelSize(18 * self._fontScale)
+		self.setFont(self._font)
 		# making qwidget object
 		content = QWidget(self)
 		self.setWidget(content)
@@ -221,6 +240,7 @@ class ScrollLabel(QScrollArea):
 	# the setText method
 	def setText(self, text):
 		# setting text to the label
+		self.label.setFont(self._font)
 		self.label.setText(text)
 		self.label.setMinimumHeight(self.label.minimumHeight() + 100)
 

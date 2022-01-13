@@ -11,6 +11,7 @@ class ZMQ_Server(QThread):
 		super().__init__()
 		self.port = port
 		self.ip_port = "tcp://*:" + str(self.port)
+		self.check_time = 1
 
 	def run(self):
 		log.debug("start to run")
@@ -27,4 +28,8 @@ class ZMQ_Server(QThread):
 			time.sleep(0.1)
 
 			#  Send reply back to client
-			self.socket.send(b"OK")
+			reply = "OK," + str(self.check_time)
+			self.socket.send(reply.encode())
+
+	def set_check_time(self, time):
+		self.check_time = time
