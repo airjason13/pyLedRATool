@@ -25,7 +25,7 @@ class MainUi(QMainWindow):
         super().__init__()
         self.cwd = os.getcwd()
         log.debug("self.cwd = %s", self.cwd)
-        self.setWindowTitle('RA Test Tool')
+        self.setWindowTitle('RA Test Tool-- ' + VERSION)
 
         self.test_ip = []
         self.client_info = []
