@@ -11,7 +11,9 @@ from PyQt5.QtWidgets import (QApplication, QMainWindow, QDesktopWidget, QStyleFa
 from PyQt5.QtGui import QPalette, QColor, QBrush, QFont, QMovie, QPixmap, QPainter, QIcon, QKeySequence, QImage
 from PyQt5.QtCore import Qt, QTimer
 from c_client_info import *
+from c_server_info import *
 from c_zmq_server import *
+from net_utils import *
 from globa_def import *
 import socket
 import platform
@@ -26,10 +28,11 @@ class MainUi(QMainWindow):
         self.cwd = os.getcwd()
         log.debug("self.cwd = %s", self.cwd)
         self.setWindowTitle('RA Test Tool-- ' + VERSION)
-
+        self.ip = get_ip_address()
         self.test_ip = []
+        self.server_info = []
         self.client_info = []
-        self.init_ui()
+
 
         self.zmq_server = ZMQ_Server(ZMQ_SERVER_PORT)
         self.zmq_server.signal_recv_message_ret.connect(self.message_parser)
@@ -39,7 +42,7 @@ class MainUi(QMainWindow):
         self.send_broadcast_timer = QTimer(self)
         self.send_broadcast_timer.timeout.connect(self.send_broadcast)
         self.send_broadcast_timer.start(3000)
-
+        self.init_ui()
 
     def init_ui(self):
         self.setFixedSize(1600, 800)
@@ -67,6 +70,13 @@ class MainUi(QMainWindow):
         self.gridlayout.addWidget(self.edit_check_period, 0, 6)
         self.gridlayout.addWidget(self.btn_check_period, 0, 7)
 
+        server_info = Server_Info_Widget(self.ip, len(self.server_info), self.widget)
+        self.server_info.append(server_info)
+        self.error_check_timer.timeout.connect(
+            self.server_info[len(self.server_info) - 1].widget_server_image.error_alert_timer)
+
+        self.gridlayout.addWidget(self.server_info[len(self.server_info) - 1],
+                                  self.server_info[len(self.server_info) - 1].id + 1, 0)
         # self.pixmap_pico = QPixmap(os.getcwd() + "/image/pico.png")
         # self.label_image_pico = QLabel(self.widget)
         # self.label_image_pico.setPixmap(self.pixmap_pico)
@@ -74,7 +84,6 @@ class MainUi(QMainWindow):
 
 
     def message_parser(self, msg):
-        #log.debug("msg = %s", msg)
         str_list = msg.split(",")
         ip = None
         str_error_info = ""
@@ -82,13 +91,21 @@ class MainUi(QMainWindow):
         for i in range(len(str_list)):
             if str_list[i].startswith("ip="):
                 ip = str_list[i].split("=")[1]
-                #log.debug("ip : %s", ip)
-                if self.add_test_ip_or_not(ip) is True:
-                    client_info = Client_Info_Widget(ip, len(self.client_info), self.widget)
-                    self.client_info.append(client_info)
-                    self.error_check_timer.timeout.connect(self.client_info[len(self.client_info) - 1].widget_client_image.error_alert_timer)
+                if ip == self.ip :
+                    log.debug("server information")
+                    #self.server_info.set_recv_msg(msg)
+                    pass
+                else:
+                    #log.debug("ip : %s", ip)
+                    if self.add_test_ip_or_not(ip) is True:
+                        client_info = Client_Info_Widget(ip, len(self.client_info), self.widget)
+                        self.client_info.append(client_info)
+                        self.error_check_timer.timeout.connect(
+                            self.client_info[len(self.client_info) - 1].widget_client_image.error_alert_timer)
 
-                    self.gridlayout.addWidget(self.client_info[len(self.client_info) - 1], self.client_info[len(self.client_info) - 1].id + 1, 0)
+                        self.gridlayout.addWidget(self.client_info[len(self.client_info) - 1],
+                                                  self.client_info[len(self.client_info) - 1].id + 1, 0)
+
             elif str_list[i].startswith(TAG_PICO_STATUS):
                 if str_list[i].split("=")[1] == TAG_NG:
                     str_error_info += "pico error,"
@@ -109,6 +126,14 @@ class MainUi(QMainWindow):
             return
 
         for i in self.client_info:
+            if i.ip == ip:
+                if len(str_error_info) > 0:
+                    str_error_info += "temp=" + str_temperature # + "\n"
+                    log.debug("str_error_info = %s", str_error_info)
+                    i.set_error_msg(str_error_info)
+                i.set_recv_msg(msg)
+
+        for i in self.server_info:
             if i.ip == ip:
                 if len(str_error_info) > 0:
                     str_error_info += "temp=" + str_temperature # + "\n"
@@ -152,7 +177,7 @@ class MainUi(QMainWindow):
             sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEPORT, 1)
             sock.bind((ip, 0))
             sock.sendto(b_msg, ("255.255.255.255", port))
-            log.debug("send broadcast ok!")
+            #log.debug("send broadcast ok!")
             sock.close()
         else:
             log.fatal("ip is None")

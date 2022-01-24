@@ -11,6 +11,8 @@ class ZMQ_Server(QThread):
 		super().__init__()
 		self.port = port
 		self.ip_port = "tcp://*:" + str(self.port)
+		#self.ip_port = "tcp://127.0.0.1:" + str(self.port)
+		log.debug("self.ip_port : %s", self.ip_port)
 		self.check_time = 1
 
 	def run(self):
