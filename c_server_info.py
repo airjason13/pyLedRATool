@@ -35,7 +35,7 @@ class Server_Info_Widget(QWidget):
 		self.recv_count = 0
 		self.label_recv_count.setText(str(self.recv_count))
 		self.label_recv_msg = QLabel(self.widget)
-		self.label_recv_msg.setFixedHeight(800)
+		#self.label_recv_msg.setFixedHeight(800)
 		self.label_recv_msg.setText("")
 
 		self.label_message_info = ScrollLabel(self.widget)
@@ -48,10 +48,10 @@ class Server_Info_Widget(QWidget):
 		self.widget_server_image = Server_Image()
 
 		# write error log file
-		self.error_log_fileuri = os.getcwd() + "/" + err_log_filename_prefix + self.ip + "_" + \
+		self.error_log_file_uri = os.getcwd() + "/" + err_log_filename_prefix + self.ip + "_" + \
 		                         datetime.datetime.now().strftime("%Y%m%d-%H%M%S") + ".dat"
-		log.debug("self.error_log_fileuri : %s", self.error_log_fileuri)
-		self.error_log_file = open(self.error_log_fileuri, 'w')
+		log.debug("self.error_log_file_uri : %s", self.error_log_file_uri)
+		self.error_log_file = open(self.error_log_file_uri, 'w')
 
 		self.gridlayout.addWidget(self.label_ip, 0, 0)
 		self.gridlayout.addWidget(self.label_id_info, 0, 1)

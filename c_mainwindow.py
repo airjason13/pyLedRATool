@@ -66,9 +66,7 @@ class MainUi(QMainWindow):
         self.btn_check_period.setText("Set")
         self.btn_check_period.setFixedWidth(100)
         self.btn_check_period.clicked.connect(self.set_check_period)
-        self.gridlayout.addWidget(self.label_check_period, 0, 5)
-        self.gridlayout.addWidget(self.edit_check_period, 0, 6)
-        self.gridlayout.addWidget(self.btn_check_period, 0, 7)
+
 
         server_info = Server_Info_Widget(self.ip, len(self.server_info), self.widget)
         self.server_info.append(server_info)
@@ -76,7 +74,11 @@ class MainUi(QMainWindow):
             self.server_info[len(self.server_info) - 1].widget_server_image.error_alert_timer)
 
         self.gridlayout.addWidget(self.server_info[len(self.server_info) - 1],
-                                  self.server_info[len(self.server_info) - 1].id + 1, 0)
+                                  self.server_info[len(self.server_info) - 1].id , 0, 3, 4)
+
+        self.gridlayout.addWidget(self.label_check_period, 0, 5)
+        self.gridlayout.addWidget(self.edit_check_period, 0, 6)
+        self.gridlayout.addWidget(self.btn_check_period, 0, 7)
         # self.pixmap_pico = QPixmap(os.getcwd() + "/image/pico.png")
         # self.label_image_pico = QLabel(self.widget)
         # self.label_image_pico.setPixmap(self.pixmap_pico)
@@ -93,7 +95,6 @@ class MainUi(QMainWindow):
                 ip = str_list[i].split("=")[1]
                 if ip == self.ip :
                     log.debug("server information")
-                    #self.server_info.set_recv_msg(msg)
                     pass
                 else:
                     #log.debug("ip : %s", ip)
