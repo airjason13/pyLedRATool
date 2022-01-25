@@ -95,6 +95,12 @@ class MainUi(QMainWindow):
                 ip = str_list[i].split("=")[1]
                 if ip == self.ip :
                     log.debug("server information")
+                    # 如果訊息內含有本身server ip, msg在加上 hdmi fps
+                    for s in self.server_info:
+                        if s.ip == ip:
+                            msg = msg + ",fps=" +str(s.get_cv2_fps())
+                            if s.get_cv2_fps() < FPS_THRESHOLD:
+                                str_error_info += "hdmi-in error,fps=" + str(s.get_cv2_fps()) + ","
                     pass
                 else:
                     #log.debug("ip : %s", ip)

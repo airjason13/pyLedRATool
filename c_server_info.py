@@ -11,6 +11,7 @@ from PyQt5.QtWidgets import (QApplication, QMainWindow, QDesktopWidget, QStyleFa
 from PyQt5.QtGui import QPalette, QColor, QBrush, QFont, QMovie, QPixmap, QPainter, QIcon, QKeySequence, QImage
 from PyQt5.QtCore import Qt, QTimer, QObject
 from globa_def import *
+from c_cv2_camera import *
 import datetime
 import log_utils
 log = log_utils.logging_init(__file__)
@@ -35,8 +36,8 @@ class Server_Info_Widget(QWidget):
 		self.recv_count = 0
 		self.label_recv_count.setText(str(self.recv_count))
 		self.label_recv_msg = QLabel(self.widget)
-		#self.label_recv_msg.setFixedHeight(800)
-		self.label_recv_msg.setText("")
+		self.label_recv_msg.setFixedWidth(900)
+		self.label_recv_msg.setText(" ")
 
 		self.label_message_info = ScrollLabel(self.widget)
 		self.error_msg_info = ""
@@ -46,6 +47,18 @@ class Server_Info_Widget(QWidget):
 		self.label_message_info.setText(self.total_error_msg_info)
 
 		self.widget_server_image = Server_Image()
+
+		self.preview_label = QLabel(self.widget)
+		self.pixmap_tiger = QPixmap(os.getcwd() + "/image/tiger.png")
+		self.pixmap_tiger.scaledToWidth(96)
+		self.pixmap_tiger.scaledToHeight(64)
+		self.preview_label.setScaledContents(True)
+		self.preview_label.setFixedWidth(128)
+		self.preview_label.setFixedHeight(96)
+		self.preview_label.setPixmap(self.pixmap_tiger)
+
+		self.cv2camera = CV2Camera("/dev/video0", "UYUV")
+		self.cv2camera.signal_get_rawdata.connect(self.getRaw)
 
 		# write error log file
 		self.error_log_file_uri = os.getcwd() + "/" + err_log_filename_prefix + self.ip + "_" + \
@@ -59,6 +72,9 @@ class Server_Info_Widget(QWidget):
 		self.gridlayout.addWidget(self.label_recv_msg, 1, 0, 1, 3)
 		self.gridlayout.addWidget(self.label_message_info, 2, 0, 2, 3)
 		self.gridlayout.addWidget(self.widget_server_image, 2, 4)
+		self.gridlayout.addWidget(self.preview_label, 2, 5)
+
+		self.cv2camera.start()
 
 	def set_error_msg(self, str):
 		current_time = "@" +datetime.datetime.now().strftime("%Y%m%d-%H%M%S") + "\n"
@@ -80,11 +96,32 @@ class Server_Info_Widget(QWidget):
 			status_list = recv_msg.split(",")
 			for status in status_list:
 				self.widget_server_image.clear_error_tag(status.split("=")[0])
+
 		self.label_recv_msg.setText(recv_msg)
 		self.recv_count += 1
 		self.label_recv_count.setText("recv_count : " + str(self.recv_count))
 
+	def getRaw(self, data):  # data 為接收到的影像
+		""" 取得影像 """
+		self.showData(data)  # 將影像傳入至 showData()
 
+	def showData(self, img):
+		""" 顯示攝影機的影像 """
+		self.Ny, self.Nx, _ = img.shape  # 取得影像尺寸
+
+		# 建立 Qimage 物件 (灰階格式)
+		# qimg = QtGui.QImage(img[:,:,0].copy().data, self.Nx, self.Ny, QtGui.QImage.Format_Indexed8)
+
+		# 建立 Qimage 物件 (RGB格式)
+		qimg = QImage(img.data, self.Nx, self.Ny, QImage.Format_BGR888)
+
+		# viewData 的顯示設定
+		self.preview_label.setScaledContents(True)  # 尺度可變
+		### 將 Qimage 物件設置到 viewData 上
+		self.preview_label.setPixmap(QPixmap.fromImage(qimg))
+
+	def get_cv2_fps(self):
+		return self.cv2camera.get_fps()
 
 class Server_Image(QWidget):
 	def __init__(self, *args, **kwargs):

@@ -12,3 +12,5 @@ TAG_TEMP_STATUS="temp_status="
 broadcast_port = 19999
 
 err_log_filename_prefix = ".ra_err_log_"
+
+FPS_THRESHOLD = 25
