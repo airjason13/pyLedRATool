@@ -2,13 +2,15 @@ import cv2
 import numpy as np
 import time
 from PyQt5 import QtCore
-from PyQt5.QtCore import Qt, QTimer
+from PyQt5.QtCore import QTimer
 import os
 import log_utils
 
 log = log_utils.logging_init(__file__)
 
-class CV2Camera(QtCore.QThread):  # 繼承 QtCore.QThread 來建立 Camera 類別
+
+class CV2Camera(QtCore.QThread):
+    # 繼承 QtCore.QThread 來建立 Camera 類別
     signal_get_rawdata = QtCore.pyqtSignal(np.ndarray)  # 建立傳遞信號，需設定傳遞型態為 np.ndarray
 
     def __init__(self, video_src, video_type, parent=None):
@@ -33,8 +35,14 @@ class CV2Camera(QtCore.QThread):  # 繼承 QtCore.QThread 來建立 Camera 類�
         # 3秒沒有frame後準備重啟
         self.reopen_threshold = 3
 
+        self.tc358743_connected = False
+        self.tc358743_width = 0
+        self.tc358743_height = 0
+        self.tc358743_fps = 0
+
         # 建立 cv2 的攝影機物件
         if self.video_type == "v4l2":
+            # usb dongle
             self.cam = cv2.VideoCapture(self.video_src)
             # 判斷攝影機是否正常連接
             if self.cam is None or not self.cam.isOpened():
@@ -44,6 +52,7 @@ class CV2Camera(QtCore.QThread):  # 繼承 QtCore.QThread 來建立 Camera 類�
                 self.connect = True
                 self.running = False
         else:
+            # tc358743, do not VideoCapture here
             self.connect = False
             self.running = False
             self.cam = None
@@ -57,15 +66,15 @@ class CV2Camera(QtCore.QThread):  # 繼承 QtCore.QThread 來建立 Camera 類�
         log.debug("start to run")
         log.debug("self.video_src = %s", self.video_src)
         # 當正常連接攝影機才能進入迴圈
-
-
         while True:
-            if self.cam is None or not self.cam.isOpened():
-                if self.connect == False:
+            if self.cam is None:
+                if self.connect is False:
                     if self.video_type == "h264":
                         self.cam = cv2.VideoCapture(self.video_src)
                     else:
-                        self.cam = cv2.VideoCapture(self.video_src)
+                        log.debug("try to open tc358743")
+                        # tc358743, VideoCapture here
+                        self.cam = self.open_tc358743_cam()
                 time.sleep(1)
 
                 if self.cam is None or not self.cam.isOpened():
@@ -79,17 +88,25 @@ class CV2Camera(QtCore.QThread):  # 繼承 QtCore.QThread 來建立 Camera 類�
                 log.debug("waiting for start to read")
                 time.sleep(1)
                 continue
-            
+
             ret, img = self.cam.read()    # 讀取影像
             if ret:
-                img = cv2.resize(img, (320, 240))
+                img = cv2.resize(img, (128, 96))
                 self.signal_get_rawdata.emit(img)    # 發送影像
+                self.fps_count += 1
             else:    # 例外處理
-                #log.debug("Warning!!!")
+                # log.debug("Warning!!!")
                 self.connect = False
+                self.cam.release()
                 self.cam = None
-            self.fps_count += 1
-            time.sleep(0.01)
+
+            tmp_connected, tmp_width, tmp_height, tmp_fps = self.get_tc358743_dv_timing()
+            if tmp_connected is False or tmp_width != self.tc358743_width or tmp_height != self.tc358743_height or \
+                    tmp_fps != self.tc358743_fps:
+                self.connect = False
+                self.cam.release()
+                self.cam = None
+            # time.sleep(0.005)
         log.debug("stop to run")
 
     def open(self):
@@ -113,22 +130,62 @@ class CV2Camera(QtCore.QThread):  # 繼承 QtCore.QThread 來建立 Camera 類�
         return self.fps
 
     def fps_counter(self):
-        if self.fps == 0:
-            self.no_fps_count += 1
-            if self.no_fps_count > self.reopen_threshold:
-                self.reopen_camera()
-                self.no_fps_count = 0
-        else:
-            self.no_fps_count = 0
         self.fps = self.fps_count
         self.fps_count = 0
 
-    def reopen_camera(self):
-        if self.cam.isOpened() is True:
-            self.cam.release()
+    def open_camera(self):
+        if self.cam is not None:
+            if self.cam.isOpened() is True:
+                self.cam.release()
+                self.cam = None
         os.system("write_tc358743_edid.sh")
-        os.system("v4l2-ctl --set-dv-bt-timing query")
-        self.cam = cv2.VideoCapture(self.video_src)
+        time.sleep(1)
+        self.tc358743_connected, self.tc358743_width, self.tc358743_height, self.tc358743_fps \
+            = self.get_tc358743_dv_timing()
+        if self.tc358743_connected is True:
+            os.system("v4l2-ctl --set-dv-bt-timing query")
+            time.sleep(1)
+            self.cam = cv2.VideoCapture(self.video_src)
 
-    def setScaleSize(self, width, height):
+    def setscalesize(self, width, height):
         pass
+
+
+    def get_tc358743_dv_timing(self):
+        # connected = False
+        width = 0
+        height = 0
+        fps = 0
+        dv_timings = os.popen("v4l2-ctl --query-dv-timings").read()
+        list_dv_timings = dv_timings.split("\n")
+
+        if 'fail' in list_dv_timings[0]:
+            log.debug("not connected")
+            connected = False
+            return connected, width, height, fps
+        else:
+            connected = True
+        if connected is True:
+            for i in list_dv_timings:
+                if 'Active width:' in i:
+                    width = int(i.split(":")[1])
+                if 'Active height:' in i:
+                    height = int(i.split(":")[1])
+                if 'Pixelclock' in i:
+                    fps = int(float(i.split("(")[1].split(" ")[0]))
+
+            log.debug("width = %d", width)
+            log.debug("height = %d", height)
+            log.debug("fps = %d", fps)
+        return connected, width, height, fps
+
+    def open_tc358743_cam(self):
+        self.tc358743_connected, self.tc358743_width, self.tc358743_height, self.tc358743_fps \
+            = self.get_tc358743_dv_timing()
+        if self.tc358743_connected is False:
+            return None
+        else:
+            res_set_dv_bt_timing = os.popen("v4l2-ctl --set-dv-bt-timings query").read()
+            log.debug("res_set_dv_bt_timing : %s", res_set_dv_bt_timing)
+            cam = cv2.VideoCapture(self.video_src)
+        return cam
