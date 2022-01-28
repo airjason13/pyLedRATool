@@ -7,6 +7,21 @@ import sys
 from PyQt5.QtWidgets import QApplication
 import qtmodern.styles
 import qtmodern.windows
+import signal
+import sys
+import os
+import time
+import globa_def
+
+def signal_handler(signum, frame):
+    if signum == signal.SIGINT.value:
+        print("QUIT!")
+        for i in range(len(gui.server_info)):
+            gui.server_info[0].cv2camera.close_v4l2_loopback_stream()
+        QApplication.quit()
+        sys.exit(1)
+
+
 
 def print_hi(name):
     # Use a breakpoint in the code line below to debug your script.
@@ -19,6 +34,7 @@ if __name__ == '__main__':
     app = QApplication(sys.argv)
     gui = MainUi()
     qtmodern.styles.dark(app)
+    signal.signal(signal.SIGINT, signal_handler)
     # qtmodern.styles.light(app)
     mw = qtmodern.windows.ModernWindow(gui)
     mw.show()

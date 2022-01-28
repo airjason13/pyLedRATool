@@ -84,6 +84,10 @@ class MainUi(QMainWindow):
         # self.label_image_pico.setPixmap(self.pixmap_pico)
         # self.gridlayout.addWidget(self.label_image_pico, 6, 6)
 
+    def closeEvent(self, e):
+        log.debug("mainwindow out!")
+        for s in self.server_info:
+            s.cv2camera.close_v4l2_loopback_stream()
 
     def message_parser(self, msg):
         str_list = msg.split(",")

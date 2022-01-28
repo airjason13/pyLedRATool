@@ -16,13 +16,13 @@ class ZMQ_Server(QThread):
 		self.check_time = 1
 
 	def run(self):
-		log.debug("start to run")
+		#log.debug("start to run")
 		self.context = zmq.Context()
 		self.socket = self.context.socket(zmq.REP)
 		self.socket.bind(self.ip_port)
 		while True:
 			b_message = self.socket.recv()
-			log.debug("Received request: %s", b_message)
+			#log.debug("Received request: %s", b_message)
 			s_message = b_message.decode()
 			self.signal_recv_message_ret.emit(s_message)
 
