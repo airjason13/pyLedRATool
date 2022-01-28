@@ -143,14 +143,14 @@ class CV2Camera(QtCore.QThread):
             return 0
         stdout = self.v4l2_loopback_pid.stdout.readline()
         fps = 0
-        log.debug("stdout = %s", stdout)
+        # log.debug("stdout = %s", stdout)
         try: 
             if 'fps=' in stdout:
                 list_str = stdout.split(" ")
                 i = 0
                 d = 0
                 for s in list_str:
-                    log.debug("s = %s", s)
+                    # log.debug("s = %s", s)
                     if 'fps=' in s:
                         d = i
                         # log.debug("d = %d", d)
