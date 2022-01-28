@@ -86,7 +86,7 @@ class Server_Info_Widget(QWidget):
 		self.label_message_info.setText(self.total_error_msg_info)
 
 	def set_recv_msg(self, recv_msg):
-		log.debug("recv_msg:%s", recv_msg)
+		# log.debug("recv_msg:%s", recv_msg)
 		if TAG_NG in recv_msg:
 			status_list = recv_msg.split(",")
 			for status in status_list:
@@ -170,7 +170,7 @@ class Server_Image(QWidget):
 		self.show_error = True
 
 	def set_error_tag(self, part):
-		log.debug("")
+		#log.debug("")
 		for i in self.error_part_list:
 			if i == part:
 				return

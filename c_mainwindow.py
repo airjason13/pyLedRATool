@@ -98,7 +98,7 @@ class MainUi(QMainWindow):
             if str_list[i].startswith("ip="):
                 ip = str_list[i].split("=")[1]
                 if ip == self.ip :
-                    log.debug("server information")
+                    #log.debug("server information")
                     # 如果訊息內含有本身server ip, msg在加上 hdmi fps
                     for s in self.server_info:
                         if s.ip == ip:
@@ -148,7 +148,7 @@ class MainUi(QMainWindow):
             if i.ip == ip:
                 if len(str_error_info) > 0:
                     str_error_info += "temp=" + str_temperature # + "\n"
-                    log.debug("str_error_info = %s", str_error_info)
+                    #log.debug("str_error_info = %s", str_error_info)
                     i.set_error_msg(str_error_info)
                 i.set_recv_msg(msg)
 

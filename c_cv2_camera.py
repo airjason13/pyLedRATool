@@ -33,7 +33,7 @@ class CV2Camera(QtCore.QThread):
         self.fps_timer = QTimer(self)
         self.fps_timer.timeout.connect(self.fps_counter)
         self.fps_count = 0
-        self.fps_timer.start(1000)
+        self.fps_timer.start(500)
         self.fps = 0
         self.s_fps = str(self.fps)
         # self.no_fps_count = 0
@@ -103,12 +103,22 @@ class CV2Camera(QtCore.QThread):
             else:    # 例外處理
                 # log.debug("Warning!!!")
                 self.connect = False
+                self.v4l2_loopback_pid.terminate()
+                self.v4l2_loopback_pid = None
                 self.cam.release()
                 self.cam = None
 
             tmp_connected, tmp_width, tmp_height, tmp_fps = self.get_tc358743_dv_timing()
             if tmp_connected is False or tmp_width != self.tc358743_width or tmp_height != self.tc358743_height or \
                     tmp_fps != self.tc358743_fps:
+                log.debug("tmp_connected = %d", tmp_connected)
+                log.debug("tmp_width = %d", tmp_width)
+                log.debug("tmp_height = %d", tmp_height)
+                log.debug("tmp_fps = %d", tmp_fps)
+                log.debug("tc358743_width = %d", self.tc358743_width)
+                log.debug("tc358743_height = %d", self.tc358743_height)
+                log.debug("tc358743_fps = %d", self.tc358743_fps)
+
                 log.debug("need to re-init")
                 self.connect = False
                 self.v4l2_loopback_pid.terminate()
@@ -142,15 +152,17 @@ class CV2Camera(QtCore.QThread):
         if self.v4l2_loopback_pid is None:
             return 0
         stdout = self.v4l2_loopback_pid.stdout.readline()
+        if stdout is None or stdout == "":
+            return 0
         fps = 0
-        # log.debug("stdout = %s", stdout)
+        log.debug("stdout = %s", stdout)
         try: 
             if 'fps=' in stdout:
                 list_str = stdout.split(" ")
                 i = 0
                 d = 0
                 for s in list_str:
-                    # log.debug("s = %s", s)
+                    #log.debug("s = %s", s)
                     if 'fps=' in s:
                         d = i
                         # log.debug("d = %d", d)
@@ -164,15 +176,16 @@ class CV2Camera(QtCore.QThread):
         except:
             log.debug("exception")
         finally:
-            log.debug("finally")
+            pass
         return fps
         
     def fps_counter(self):
-        log.debug("fps_counter")
+        # log.debug("fps_counter")
         self.fps = self.get_fps_from_loopback_pid()
         # self.fps = self.fps_count
         self.fps_count = 0
-
+    
+    # useless
     def open_camera(self):
         if self.cam is not None:
             if self.cam.isOpened() is True:
