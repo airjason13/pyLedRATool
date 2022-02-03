@@ -57,8 +57,13 @@ class Server_Info_Widget(QWidget):
 		self.preview_label.setFixedHeight(96)
 		self.preview_label.setPixmap(self.pixmap_tiger)
 
+		self.ffmpeg_qprocess = None
+		# self.run_ffmpeg_loopback()
+
 		self.cv2camera = CV2Camera("/dev/video0", "UYUV")
 		self.cv2camera.signal_get_rawdata.connect(self.getRaw)
+		self.cv2camera.signal_cv2_read_fail.connect(self.ffmpeg_qprocess_terminate)
+		self.cv2camera.signal_tc358743_loopback.connect(self.run_ffmpeg_loopback)
 
 		# write error log file
 		self.error_log_file_uri = os.getcwd() + "/" + err_log_filename_prefix + self.ip + "_" + \
@@ -82,7 +87,8 @@ class Server_Info_Widget(QWidget):
 		self.error_log_file.write(str)
 		self.error_log_file.flush()
 		self.error_msg_info = str
-		self.total_error_msg_info += self.error_msg_info
+		#self.total_error_msg_info += self.error_msg_info
+		self.total_error_msg_info = self.error_msg_info
 		self.label_message_info.setText(self.total_error_msg_info)
 
 	def set_recv_msg(self, recv_msg):
@@ -116,13 +122,35 @@ class Server_Info_Widget(QWidget):
 		qimg = QImage(img.data, self.Nx, self.Ny, QImage.Format_BGR888)
 
 		# viewData 的顯示設定
-		self.preview_label.setScaledContents(True)  # 尺度可變
+		#self.preview_label.setScaledContents(True)  # 尺度可變
 		### 將 Qimage 物件設置到 viewData 上
 		self.preview_label.setPixmap(QPixmap.fromImage(qimg))
 
 	def get_cv2_fps(self):
 		return self.cv2camera.get_fps()
 
+	def run_ffmpeg_loopback(self):
+		ffmpeg_param = [ "-hide_banner", "-f", "v4l2", "-i", "/dev/video0", "-vsync", "2", "-input_format", "RGB3", "-f", "v4l2", "/dev/video5"]
+		self.ffmpeg_qprocess = QProcess(self)
+		self.ffmpeg_qprocess.setProcessChannelMode(QProcess.MergedChannels)
+		self.ffmpeg_qprocess.finished.connect(self.ffmpeg_qprocess_finished)
+		# self.ffmpeg_qprocess.readyReadStandardOutput.connect(self.ffmpeg_qprocess_stdout)
+		os.system("v4l2-ctl --set-dv-bt-timing query")
+		time.sleep(1)
+		self.ffmpeg_qprocess.start("ffmpeg", ffmpeg_param)
+	
+	def ffmpeg_qprocess_finished(self):
+		log.debug("ffmpeg_qprocess_finished")
+
+	def ffmpeg_qprocess_stdout(self):
+		pass
+		log.debug("")
+
+	def ffmpeg_qprocess_terminate(self):
+		log.debug("")
+		self.ffmpeg_qprocess.terminate()
+		self.ffmpeg_qprocess = None
+        
 class Server_Image(QWidget):
 	def __init__(self, *args, **kwargs):
 		super(Server_Image, self).__init__(**kwargs)
@@ -249,4 +277,4 @@ class ScrollLabel(QScrollArea):
 		# setting text to the label
 		self.label.setFont(self._font)
 		self.label.setText(text)
-		self.label.setMinimumHeight(self.label.minimumHeight() + 100)
+		# self.label.setMinimumHeight(self.label.minimumHeight() + 100)

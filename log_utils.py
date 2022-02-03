@@ -25,7 +25,7 @@ def logging_init(s):
     global log_level
     log = logging.getLogger(s)
     formatter = logging.Formatter('%(asctime)s %(levelname)-8s[%(filename)s:%(lineno)d(%(funcName)s)] %(message)s')
-    file_handler = RotatingFileHandler(os.path.join(log_dir,  'ledserver.log'),
+    file_handler = RotatingFileHandler(os.path.join(log_dir,  'led_ra_test.log'),
                                        maxBytes=1024 * 1024 * 5,
                                        backupCount=10)
     file_handler.setLevel(log_level)

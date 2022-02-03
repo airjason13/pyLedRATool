@@ -33,6 +33,17 @@ class MainUi(QMainWindow):
         self.server_info = []
         self.client_info = []
 
+        #self.ffmpeg_qprocess = QProcess(self)
+        #self.ffmpeg_qprocess.readyReadStandardOutput.connect(self.read_ffmpeg_qprocess)
+        # self.ffmpeg_qprocess.terminate.connect(self.terminate_ffmpeg_qprocess)
+        #self.ffmpeg_qprocess.finished.connect(self.finished_ffmpeg_qprocess)
+        #os.system("v4l2-ctl --set-dv-bt-timing query")
+        #time.sleep(1)
+
+        #ffmpeg_param = [ "-hide_banner", "-f", "v4l2", "-i", "/dev/video0", "-vsync", "2", "-input_format", "RGB3", "-f", "v4l2",
+        #             "/dev/video5"]
+        #self.ffmpeg_qprocess.start("ffmpeg", ffmpeg_param)
+
 
         self.zmq_server = ZMQ_Server(ZMQ_SERVER_PORT)
         self.zmq_server.signal_recv_message_ret.connect(self.message_parser)
@@ -43,6 +54,7 @@ class MainUi(QMainWindow):
         self.send_broadcast_timer.timeout.connect(self.send_broadcast)
         self.send_broadcast_timer.start(3000)
         self.init_ui()
+
 
     def init_ui(self):
         self.setFixedSize(1600, 800)
@@ -102,9 +114,10 @@ class MainUi(QMainWindow):
                     # 如果訊息內含有本身server ip, msg在加上 hdmi fps
                     for s in self.server_info:
                         if s.ip == ip:
-                            msg = msg + ",fps=" +str(s.get_cv2_fps())
-                            if s.get_cv2_fps() < FPS_THRESHOLD:
-                                str_error_info += "hdmi-in error,fps=" + str(s.get_cv2_fps()) + ","
+                            cv2_fps = s.get_cv2_fps()
+                            msg = msg + "\n" + "fps=" +str(cv2_fps)
+                            if cv2_fps < FPS_THRESHOLD:
+                                str_error_info += "hdmi-in error,fps=" + str(cv2_fps) + ","
                     pass
                 else:
                     #log.debug("ip : %s", ip)
@@ -195,3 +208,12 @@ class MainUi(QMainWindow):
 
     def set_check_period(self):
         self.zmq_server.set_check_time(int(self.edit_check_period.text()))
+
+    def read_ffmpeg_qprocess(self):
+        log.debug("ffmpeg_qprocess output: %s", self.ffmpeg_qprocess.readAllStandardOutput())
+
+    def terminate_ffmpeg_qprocess(self):
+        log.debug("ffmpeg qprocess terminated")
+
+    def finished_ffmpeg_qprocess(self):
+        log.debug("ffmpeg qprocess finished")

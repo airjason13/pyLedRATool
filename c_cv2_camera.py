@@ -2,7 +2,7 @@ import cv2
 import numpy as np
 import time
 from PyQt5 import QtCore
-from PyQt5.QtCore import QTimer
+from PyQt5.QtCore import QTimer, QProcess
 import os
 
 import ffmpy_utils
@@ -14,6 +14,8 @@ log = log_utils.logging_init(__file__)
 class CV2Camera(QtCore.QThread):
     # 繼承 QtCore.QThread 來建立 Camera 類別
     signal_get_rawdata = QtCore.pyqtSignal(np.ndarray)  # 建立傳遞信號，需設定傳遞型態為 np.ndarray
+    signal_cv2_read_fail = QtCore.pyqtSignal()
+    signal_tc358743_loopback = QtCore.pyqtSignal()
 
     def __init__(self, video_src, video_type, parent=None):
         """ 初始化
@@ -33,12 +35,13 @@ class CV2Camera(QtCore.QThread):
         self.fps_timer = QTimer(self)
         self.fps_timer.timeout.connect(self.fps_counter)
         self.fps_count = 0
-        self.fps_timer.start(500)
+        self.fps_timer.start(1000)
         self.fps = 0
         self.s_fps = str(self.fps)
         # self.no_fps_count = 0
         # 3秒沒有frame後準備重啟
         # self.reopen_threshold = 3
+
 
         self.tc358743_connected = False
         self.tc358743_width = 0
@@ -98,17 +101,19 @@ class CV2Camera(QtCore.QThread):
             if ret:
                 img = cv2.resize(img, (64, 48))
                 # img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+                # if self.fps_count%30 == 0:
                 self.signal_get_rawdata.emit(img)    # 發送影像
                 self.fps_count += 1
             else:    # 例外處理
-                # log.debug("Warning!!!")
+                log.debug("Warning!!!")
                 self.connect = False
-                self.v4l2_loopback_pid.terminate()
-                self.v4l2_loopback_pid = None
+                self.signal_cv2_read_fail.emit()
+                #self.v4l2_loopback_pid.terminate()
+                #self.v4l2_loopback_pid = None
                 self.cam.release()
                 self.cam = None
 
-            tmp_connected, tmp_width, tmp_height, tmp_fps = self.get_tc358743_dv_timing()
+            '''tmp_connected, tmp_width, tmp_height, tmp_fps = self.get_tc358743_dv_timing()
             if tmp_connected is False or tmp_width != self.tc358743_width or tmp_height != self.tc358743_height or \
                     tmp_fps != self.tc358743_fps:
                 log.debug("tmp_connected = %d", tmp_connected)
@@ -124,7 +129,7 @@ class CV2Camera(QtCore.QThread):
                 self.v4l2_loopback_pid.terminate()
                 self.v4l2_loopback_pid = None
                 self.cam.release()
-                self.cam = None
+                self.cam = None'''
             #time.sleep(0.005)
         log.debug("stop to run")
 
@@ -146,6 +151,7 @@ class CV2Camera(QtCore.QThread):
             self.cam.release()      # 釋放攝影機
 
     def get_fps(self):
+        log.debug("fps = %d", self.fps)
         return self.fps
 
     def get_fps_from_loopback_pid(self):
@@ -180,9 +186,9 @@ class CV2Camera(QtCore.QThread):
         return fps
         
     def fps_counter(self):
-        # log.debug("fps_counter")
-        self.fps = self.get_fps_from_loopback_pid()
-        # self.fps = self.fps_count
+        # log.debug("fps_count = %d", self.fps_count)
+        # self.fps = self.get_fps_from_loopback_pid()
+        self.fps = self.fps_count
         self.fps_count = 0
     
     # useless
@@ -240,9 +246,18 @@ class CV2Camera(QtCore.QThread):
         else:
             res_set_dv_bt_timing = os.popen("v4l2-ctl --set-dv-bt-timings query").read()
             log.debug("res_set_dv_bt_timing : %s", res_set_dv_bt_timing)
-            self.v4l2_loopback_pid = ffmpy_utils.v4l2_stream_loopback_with_subprocess(self.video_src, self.video_loopback_dst)
+            ''' with QProcess'''
+            #ffmpeg_param = ["ffmpeg", "-hide_banner", "-f", "v4l2", "-i", self.video_src, "-vsync", "2", "-f", "v4l2",
+            #              self.video_dst]
+            #self.ffmpeg_qprocess.start("ffmpeg", ffmpeg_param)
+            self.signal_tc358743_loopback.emit()
+            time.sleep(2)
             cam = cv2.VideoCapture(self.video_loopback_dst)
-            v4l2_loopback_process = self.v4l2_loopback_pid
+
+            '''with subprocess'''
+            #self.v4l2_loopback_pid = ffmpy_utils.v4l2_stream_loopback_with_subprocess(self.video_src, self.video_loopback_dst)
+            #cam = cv2.VideoCapture(self.video_loopback_dst)
+            #v4l2_loopback_process = self.v4l2_loopback_pid
             #while True:
             #    stdout = self.v4l2_loopback_pid.stdout.readline()
             #    if stdout is None or stdout == "":
@@ -253,3 +268,12 @@ class CV2Camera(QtCore.QThread):
     def close_v4l2_loopback_stream(self):
         if self.v4l2_loopback_pid is not None:
             self.v4l2_loopback_pid.terminate()
+
+    def read_ffmpeg_qprocess(self):
+        log.debug("ffmpeg_qprocess output: %s", self.ffmpeg_qprocess.readAllStandardOutput())
+
+    def terminate_ffmpeg_qprocess(self):
+        log.debug("ffmpeg qprocess terminated")
+
+    def finished_ffmpeg_qprocess(self):
+        log.debug("ffmpeg qprocess finished")
