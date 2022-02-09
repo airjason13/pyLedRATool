@@ -149,6 +149,11 @@ class MainUi(QMainWindow):
             elif str_list[i].startswith(TAG_LCD1602_STATUS):
                 if str_list[i].split("=")[1] == TAG_NG:
                     str_error_info += "lcd1602 error,"
+            elif str_list[i].startswith(TAG_THROTTLED_STATUS):
+                str_throttled_value = str_list[i].split("=")[1]
+                int_throttled_value = int(str_throttled_value, 16)
+                if int_throttled_value != 0x0000:
+                    str_error_info += self.parse_throttled_value(int_throttled_value)
             elif str_list[i].startswith(TAG_TEMP_STATUS):
                 str_temperature = str_list[i].split("=")[1]
 
@@ -224,3 +229,24 @@ class MainUi(QMainWindow):
 
     def finished_ffmpeg_qprocess(self):
         log.debug("ffmpeg qprocess finished")
+
+    def parse_throttled_value(self, throttled_value):
+        res = ""
+        if throttled_value & 0x8000 == 0x8000:
+            res = res + "Soft temperature limit has occurred,"
+        if throttled_value & 0x4000 == 0x4000:
+            res = res + "Throttling has occurred,"
+        if throttled_value & 0x2000 == 0x2000:
+            res = res + "Arm frequency capping has occurred,"
+        if throttled_value & 0x1000 == 0x1000:
+            res = res + "Arm frequency capping has occurred,"
+        if throttled_value & 0x8 == 0x8:
+            res = res + "Soft temperature limit active,"
+        if throttled_value & 0x4 == 0x4:
+            res = res + "Currently throttled,"
+        if throttled_value & 0x2 == 0x2:
+            res = res + "Arm frequency capped,"
+        if throttled_value & 0x1 == 0x1:
+            res = res + "Under-voltage detected,"
+
+        return res

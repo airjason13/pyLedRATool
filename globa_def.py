@@ -10,6 +10,7 @@ TAG_TERMINUS_STATUS="terminus_status="
 TAG_ETH_STATUS="br0_status="
 TAG_LCD1602_STATUS="lcd1602_status="
 TAG_TEMP_STATUS="temp_status="
+TAG_THROTTLED_STATUS="throttled="
 
 broadcast_port = 19999
 
