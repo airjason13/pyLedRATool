@@ -220,13 +220,13 @@ class MainUi(QMainWindow):
 
     def parse_throttled_value(self, throttled_value):
         res = ""
-        if throttled_value & 0x8000 == 0x8000:
+        if throttled_value & 0x80000 == 0x80000:
             res = res + "Soft temperature limit has occurred,"
-        if throttled_value & 0x4000 == 0x4000:
+        if throttled_value & 0x40000 == 0x40000:
             res = res + "Throttling has occurred,"
-        if throttled_value & 0x2000 == 0x2000:
+        if throttled_value & 0x20000 == 0x20000:
             res = res + "Arm frequency capping has occurred,"
-        if throttled_value & 0x1000 == 0x1000:
+        if throttled_value & 0x10000 == 0x10000:
             res = res + "Arm frequency capping has occurred,"
         if throttled_value & 0x8 == 0x8:
             res = res + "Soft temperature limit active,"
