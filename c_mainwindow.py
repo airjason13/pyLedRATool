@@ -114,8 +114,15 @@ class MainUi(QMainWindow):
                     # 如果訊息內含有本身server ip, msg在加上 hdmi fps
                     for s in self.server_info:
                         if s.ip == ip:
+                            # get cpu freq info
+                            cpu_setting_clock = s.get_cpu_setting_clock()
+                            cpu_current_clock = s.get_cpu_current_clock()
+                            msg = msg + "\n" + "cpu_setting_clock=" + cpu_setting_clock
+                            msg = msg + "," + "cpu_current_clock=" + cpu_current_clock
+
+                            # get cv2 preview fps
                             cv2_fps = s.get_cv2_fps()
-                            msg = msg + "\n" + "fps=" +str(cv2_fps)
+                            msg = msg + "," + "fps=" +str(cv2_fps)
                             if cv2_fps < FPS_THRESHOLD:
                                 str_error_info += "hdmi-in error,fps=" + str(cv2_fps) + ","
                     pass
