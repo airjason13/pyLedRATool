@@ -130,12 +130,12 @@ class Server_Info_Widget(QWidget):
 
 	def get_cpu_setting_clock(self):
 		rep = os.popen("vcgencmd measure_clock arm").read()
-		setting_clock = rep.split("=")[:6]
-		return setting_clock
+		setting_clock = rep.split("=")[1]
+		return setting_clock[:6]
 
 	def get_cpu_current_clock(self):
 		rep = os.popen("cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_cur_freq").read()
-		current_clock = rep.split("=")
+		current_clock = rep
 		return current_clock
 
 	def get_cv2_fps(self):
