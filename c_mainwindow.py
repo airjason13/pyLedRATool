@@ -108,9 +108,15 @@ class MainUi(QMainWindow):
                             msg = msg + "\n" + "cpu_setting_clock=" + cpu_setting_clock
                             msg = msg + "," + "cpu_current_clock=" + cpu_current_clock
 
+                            # get ffmpeg loopback fps
+                            ffmpeg_loopback_fps = s.get_ffmpeg_loopback_fps()
+                            msg = msg + "," + "ff_loopback_fps=" + str(ffmpeg_loopback_fps)
+                            if ffmpeg_loopback_fps < FPS_THRESHOLD:
+                                str_error_info += "hdmi-in error,fps=" + str(ffmpeg_loopback_fps) + ","
+
                             # get cv2 preview fps
                             cv2_fps = s.get_cv2_fps()
-                            msg = msg + "," + "fps=" +str(cv2_fps)
+                            msg = msg + "," + "cv2_fps=" +str(cv2_fps)
                             if cv2_fps < FPS_THRESHOLD:
                                 str_error_info += "hdmi-in error,fps=" + str(cv2_fps) + ","
                     pass

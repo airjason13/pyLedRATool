@@ -139,6 +139,9 @@ class Server_Info_Widget(QWidget):
 		current_clock = rep[:len(rep)-1]
 		return current_clock
 
+	def get_ffmpeg_loopback_fps(self):
+		return self.ffmpeg_fps
+
 	def get_cv2_fps(self):
 		return self.cv2camera.get_fps()
 
@@ -150,7 +153,7 @@ class Server_Info_Widget(QWidget):
 		self.ffmpeg_qprocess.finished.connect(self.ffmpeg_qprocess_finished)
 		self.ffmpeg_qprocess.readyReadStandardOutput.connect(self.ffmpeg_qprocess_stdout)
 		self.ffmpeg_fps = 0
-		os.system("v4l2-ctl --set-dv-bt-timing query")
+		# os.system("v4l2-ctl --set-dv-bt-timing query")
 		time.sleep(1)
 		self.ffmpeg_qprocess.start("ffmpeg", ffmpeg_param)
 
