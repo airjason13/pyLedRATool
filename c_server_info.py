@@ -14,7 +14,9 @@ from globa_def import *
 from c_cv2_camera import *
 import datetime
 import log_utils
+
 log = log_utils.logging_init(__file__)
+
 
 class Server_Info_Widget(QWidget):
 	def __init__(self, ip, id, parent_widget, **kwargs):
@@ -67,7 +69,7 @@ class Server_Info_Widget(QWidget):
 
 		# write error log file
 		self.error_log_file_uri = os.getcwd() + "/" + err_log_filename_prefix + self.ip + "_" + \
-		                         datetime.datetime.now().strftime("%Y%m%d-%H%M%S") + ".dat"
+		                          datetime.datetime.now().strftime("%Y%m%d-%H%M%S") + ".dat"
 		log.debug("self.error_log_file_uri : %s", self.error_log_file_uri)
 		self.error_log_file = open(self.error_log_file_uri, 'w')
 
@@ -82,12 +84,12 @@ class Server_Info_Widget(QWidget):
 		self.cv2camera.start()
 
 	def set_error_msg(self, str):
-		current_time = "@" +datetime.datetime.now().strftime("%Y%m%d-%H%M%S") + "\n"
+		current_time = "@" + datetime.datetime.now().strftime("%Y%m%d-%H%M%S") + "\n"
 		str += current_time
 		self.error_log_file.write(str)
 		self.error_log_file.flush()
 		self.error_msg_info = str
-		#self.total_error_msg_info += self.error_msg_info
+		# self.total_error_msg_info += self.error_msg_info
 		self.total_error_msg_info = self.error_msg_info
 		self.label_message_info.setText(self.total_error_msg_info)
 
@@ -122,7 +124,7 @@ class Server_Info_Widget(QWidget):
 		qimg = QImage(img.data, self.Nx, self.Ny, QImage.Format_BGR888)
 
 		# viewData 的顯示設定
-		#self.preview_label.setScaledContents(True)  # 尺度可變
+		# self.preview_label.setScaledContents(True)  # 尺度可變
 		### 將 Qimage 物件設置到 viewData 上
 		self.preview_label.setPixmap(QPixmap.fromImage(qimg))
 
@@ -130,15 +132,16 @@ class Server_Info_Widget(QWidget):
 		return self.cv2camera.get_fps()
 
 	def run_ffmpeg_loopback(self):
-		ffmpeg_param = [ "-hide_banner", "-f", "v4l2", "-i", "/dev/video0", "-vsync", "2", "-input_format", "RGB3", "-f", "v4l2", "/dev/video5"]
+		ffmpeg_param = \
+			["-hide_banner", "-f", "v4l2", "-i", "/dev/video0", "-vsync", "2", "-input_format", "RGB3", "-f", "v4l2", "/dev/video5"]
 		self.ffmpeg_qprocess = QProcess(self)
 		self.ffmpeg_qprocess.setProcessChannelMode(QProcess.MergedChannels)
 		self.ffmpeg_qprocess.finished.connect(self.ffmpeg_qprocess_finished)
-		# self.ffmpeg_qprocess.readyReadStandardOutput.connect(self.ffmpeg_qprocess_stdout)
+		self.ffmpeg_qprocess.readyReadStandardOutput.connect(self.ffmpeg_qprocess_stdout)
 		os.system("v4l2-ctl --set-dv-bt-timing query")
 		time.sleep(1)
 		self.ffmpeg_qprocess.start("ffmpeg", ffmpeg_param)
-	
+
 	def ffmpeg_qprocess_finished(self):
 		log.debug("ffmpeg_qprocess_finished")
 
@@ -150,7 +153,8 @@ class Server_Info_Widget(QWidget):
 		log.debug("")
 		self.ffmpeg_qprocess.terminate()
 		self.ffmpeg_qprocess = None
-        
+
+
 class Server_Image(QWidget):
 	def __init__(self, *args, **kwargs):
 		super(Server_Image, self).__init__(**kwargs)
@@ -189,7 +193,6 @@ class Server_Image(QWidget):
 
 		self.pixmap_error_red = QPixmap(os.getcwd() + "/image/error_red.png")
 
-
 		self.gridlayout.addWidget(self.label_image_pi4, 1, 2)
 		self.gridlayout.addWidget(self.label_image_lcd1602, 0, 2)
 		self.gridlayout.addWidget(self.label_image_eth, 1, 3)
@@ -198,7 +201,7 @@ class Server_Image(QWidget):
 		self.show_error = True
 
 	def set_error_tag(self, part):
-		#log.debug("")
+		# log.debug("")
 		for i in self.error_part_list:
 			if i == part:
 				return
@@ -260,14 +263,13 @@ class ScrollLabel(QScrollArea):
 		# creating label
 		self.label = QLabel(content)
 
-
 		# setting alignment to the text
 		self.label.setAlignment(Qt.AlignLeft | Qt.AlignTop)
 
 		# making label multi-line
 		self.label.setWordWrap(True)
 		self.label.setMinimumWidth(800)
-		#self.label_min_height = self.label.minimumHeight()
+		# self.label_min_height = self.label.minimumHeight()
 
 		# adding label to the layout
 		lay.addWidget(self.label)
@@ -277,4 +279,4 @@ class ScrollLabel(QScrollArea):
 		# setting text to the label
 		self.label.setFont(self._font)
 		self.label.setText(text)
-		# self.label.setMinimumHeight(self.label.minimumHeight() + 100)
+	# self.label.setMinimumHeight(self.label.minimumHeight() + 100)
