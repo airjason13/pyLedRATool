@@ -60,6 +60,7 @@ class Server_Info_Widget(QWidget):
 		self.preview_label.setPixmap(self.pixmap_tiger)
 
 		self.ffmpeg_qprocess = None
+		self.ffmpeg_fps = 0
 		# self.run_ffmpeg_loopback()
 
 		self.cv2camera = CV2Camera("/dev/video0", "UYUV")
@@ -148,6 +149,7 @@ class Server_Info_Widget(QWidget):
 		self.ffmpeg_qprocess.setProcessChannelMode(QProcess.MergedChannels)
 		self.ffmpeg_qprocess.finished.connect(self.ffmpeg_qprocess_finished)
 		self.ffmpeg_qprocess.readyReadStandardOutput.connect(self.ffmpeg_qprocess_stdout)
+		self.ffmpeg_fps = 0
 		os.system("v4l2-ctl --set-dv-bt-timing query")
 		time.sleep(1)
 		self.ffmpeg_qprocess.start("ffmpeg", ffmpeg_param)
@@ -156,13 +158,23 @@ class Server_Info_Widget(QWidget):
 		log.debug("ffmpeg_qprocess_finished")
 
 	def ffmpeg_qprocess_stdout(self):
-		qprocess_stdout = self.ffmpeg_qprocess.readAllStandardOutput().data().decode().strip()
-		log.debug("qprocess_stdout = %s", qprocess_stdout)
+		qprocess_stdout = ""
+		if self.ffmpeg_qprocess is not None:
+			qprocess_stdout = self.ffmpeg_qprocess.readAllStandardOutput().data().decode().strip()
+			log.debug("qprocess_stdout = %s", qprocess_stdout)
+			list_str = qprocess_stdout.split(" ")
+			for i in range(len(list_str)):
+				if list_str[i] == "fps=":
+					self.ffmpeg_fps = int(list_str[i+1])
+					log.debug("self.ffmpeg_fps = %d", self.ffmpeg_fps)
+					break
+
 
 	def ffmpeg_qprocess_terminate(self):
 		log.debug("")
 		self.ffmpeg_qprocess.terminate()
 		self.ffmpeg_qprocess = None
+		self.ffmpeg_fps = 0
 
 
 class Server_Image(QWidget):
