@@ -156,8 +156,8 @@ class Server_Info_Widget(QWidget):
 		log.debug("ffmpeg_qprocess_finished")
 
 	def ffmpeg_qprocess_stdout(self):
-		pass
-		log.debug("")
+		qprocess_stdout = self.ffmpeg_qprocess.readAllStandardOutput().data().decode().strip()
+		log.debug("qprocess_stdout = %s", qprocess_stdout)
 
 	def ffmpeg_qprocess_terminate(self):
 		log.debug("")
