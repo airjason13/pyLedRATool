@@ -33,18 +33,6 @@ class MainUi(QMainWindow):
         self.server_info = []
         self.client_info = []
 
-        #self.ffmpeg_qprocess = QProcess(self)
-        #self.ffmpeg_qprocess.readyReadStandardOutput.connect(self.read_ffmpeg_qprocess)
-        # self.ffmpeg_qprocess.terminate.connect(self.terminate_ffmpeg_qprocess)
-        #self.ffmpeg_qprocess.finished.connect(self.finished_ffmpeg_qprocess)
-        #os.system("v4l2-ctl --set-dv-bt-timing query")
-        #time.sleep(1)
-
-        #ffmpeg_param = [ "-hide_banner", "-f", "v4l2", "-i", "/dev/video0", "-vsync", "2", "-input_format", "RGB3", "-f", "v4l2",
-        #             "/dev/video5"]
-        #self.ffmpeg_qprocess.start("ffmpeg", ffmpeg_param)
-
-
         self.zmq_server = ZMQ_Server(ZMQ_SERVER_PORT)
         self.zmq_server.signal_recv_message_ret.connect(self.message_parser)
         self.zmq_server.start()
@@ -152,8 +140,8 @@ class MainUi(QMainWindow):
             elif str_list[i].startswith(TAG_THROTTLED_STATUS):
                 str_throttled_value = str_list[i].split("=")[1]
                 int_throttled_value = int(str_throttled_value, 16)
-                if int_throttled_value != 0x0000:
-                    str_error_info += self.parse_throttled_value(int_throttled_value)
+                log.debug("int_throttled_value = 0x%x", int_throttled_value)
+                str_error_info += self.parse_throttled_value(int_throttled_value)
             elif str_list[i].startswith(TAG_TEMP_STATUS):
                 str_temperature = str_list[i].split("=")[1]
 
@@ -248,5 +236,5 @@ class MainUi(QMainWindow):
             res = res + "Arm frequency capped,"
         if throttled_value & 0x1 == 0x1:
             res = res + "Under-voltage detected,"
-
+        log.debug("parse_throttled_value res = %s", res)
         return res

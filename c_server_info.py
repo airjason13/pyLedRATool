@@ -128,12 +128,12 @@ class Server_Info_Widget(QWidget):
 		### 將 Qimage 物件設置到 viewData 上
 		self.preview_label.setPixmap(QPixmap.fromImage(qimg))
 
-	def get_cpu_setting_clock(self):
+	def get_cpu_current_clock(self):
 		rep = os.popen("vcgencmd measure_clock arm").read()
 		setting_clock = rep.split("=")[1]
 		return setting_clock[:7]
 
-	def get_cpu_current_clock(self):
+	def get_cpu_setting_clock(self):
 		rep = os.popen("cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_cur_freq").read()
 		current_clock = rep[:len(rep)-1]
 		return current_clock
