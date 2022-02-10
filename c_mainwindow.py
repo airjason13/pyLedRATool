@@ -107,6 +107,10 @@ class MainUi(QMainWindow):
                             cpu_current_clock = s.get_cpu_current_clock()
                             msg = msg + "\n" + "cpu_setting_clock=" + cpu_setting_clock
                             msg = msg + "," + "cpu_current_clock=" + cpu_current_clock
+                            s.cpu_setting_clock = int(cpu_setting_clock)
+                            s.cpu_current_clock = int(cpu_current_clock)
+                            if s.cpu_current_clock < s.cpu_setting_clock:
+                                str_error_info += "cpu throttled, cpu_clock=" + cpu_current_clock
 
                             # get ffmpeg loopback fps
                             ffmpeg_loopback_fps = s.get_ffmpeg_loopback_fps()
@@ -226,14 +230,15 @@ class MainUi(QMainWindow):
 
     def parse_throttled_value(self, throttled_value):
         res = ""
-        if throttled_value & 0x80000 == 0x80000:
+        # remove the throttled history message
+        ''' if throttled_value & 0x80000 == 0x80000:
             res = res + "Soft temperature limit has occurred,"
         if throttled_value & 0x40000 == 0x40000:
             res = res + "Throttling has occurred,"
         if throttled_value & 0x20000 == 0x20000:
             res = res + "Arm frequency capping has occurred,"
         if throttled_value & 0x10000 == 0x10000:
-            res = res + "Arm frequency capping has occurred,"
+            res = res + "Arm frequency capping has occurred,"'''
         if throttled_value & 0x8 == 0x8:
             res = res + "Soft temperature limit active,"
         if throttled_value & 0x4 == 0x4:

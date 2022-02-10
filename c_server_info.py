@@ -59,6 +59,9 @@ class Server_Info_Widget(QWidget):
 		self.preview_label.setFixedHeight(96)
 		self.preview_label.setPixmap(self.pixmap_tiger)
 
+		self.cpu_setting_clock = 0
+		self.cpu_current_clock = 0
+
 		self.ffmpeg_qprocess = None
 		self.ffmpeg_fps = 0
 		# self.run_ffmpeg_loopback()
