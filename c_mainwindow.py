@@ -150,7 +150,7 @@ class MainUi(QMainWindow):
             elif str_list[i].startswith(TAG_THROTTLED_STATUS):
                 str_throttled_value = str_list[i].split("=")[1]
                 int_throttled_value = int(str_throttled_value, 16)
-                log.debug("int_throttled_value = 0x%x", int_throttled_value)
+                # log.debug("int_throttled_value = 0x%x", int_throttled_value)
                 str_error_info += self.parse_throttled_value(int_throttled_value)
             elif str_list[i].startswith(TAG_TEMP_STATUS):
                 str_temperature = str_list[i].split("=")[1]
@@ -247,5 +247,5 @@ class MainUi(QMainWindow):
             res = res + "Arm frequency capped,"
         if throttled_value & 0x1 == 0x1:
             res = res + "Under-voltage detected,"
-        log.debug("parse_throttled_value res = %s", res)
+        # log.debug("parse_throttled_value res = %s", res)
         return res

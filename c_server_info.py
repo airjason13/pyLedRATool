@@ -164,15 +164,14 @@ class Server_Info_Widget(QWidget):
 		log.debug("ffmpeg_qprocess_finished")
 
 	def ffmpeg_qprocess_stdout(self):
-		qprocess_stdout = ""
 		if self.ffmpeg_qprocess is not None:
 			qprocess_stdout = self.ffmpeg_qprocess.readAllStandardOutput().data().decode().strip()
-			log.debug("qprocess_stdout = %s", qprocess_stdout)
+			# log.debug("qprocess_stdout = %s", qprocess_stdout)
 			list_str = qprocess_stdout.split(" ")
 			for i in range(len(list_str)):
 				if list_str[i] == "fps=":
 					self.ffmpeg_fps = int(list_str[i+1])
-					log.debug("self.ffmpeg_fps = %d", self.ffmpeg_fps)
+					# log.debug("self.ffmpeg_fps = %d", self.ffmpeg_fps)
 					break
 
 
