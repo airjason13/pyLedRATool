@@ -97,6 +97,9 @@ class MainUi(QMainWindow):
         for i in range(len(str_list)):
             if str_list[i].startswith("ip="):
                 ip = str_list[i].split("=")[1]
+                if ip == "":
+                    log.debug("do not parse message from non ip")
+                    return
                 if ip == self.ip :
                     #log.debug("server information")
                     # 如果訊息內含有本身server ip, msg在加上 hdmi fps
