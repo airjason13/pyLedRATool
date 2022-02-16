@@ -52,8 +52,7 @@ def print_hi(name):
 if __name__ == '__main__':
     print_hi('PyCharm')
 
-    # res = parse_throttled_value(0xe008)
-    # print("res =", res)
+
     app = QApplication(sys.argv)
     gui = MainUi()
     qtmodern.styles.dark(app)
