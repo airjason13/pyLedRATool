@@ -13,9 +13,12 @@ from PyQt5.QtCore import Qt, QTimer, QObject
 from globa_def import *
 import datetime
 import log_utils
+
 log = log_utils.logging_init(__file__)
 
+
 class Client_Info_Widget(QWidget):
+
 	def __init__(self, ip, id, parent_widget, **kwargs):
 		super(Client_Info_Widget, self).__init__(**kwargs)
 		self.parent_widget = parent_widget
@@ -46,17 +49,16 @@ class Client_Info_Widget(QWidget):
 
 		self.widget_client_image = Client_Image()
 
-		#write error log file
-		self.error_log_fileuri = os.getcwd() + "/"+ err_log_filename_prefix + self.ip + "_" + \
-		                          datetime.datetime.now().strftime("%Y%m%d-%H%M%S") + ".dat"
+		# write error log file
+		self.error_log_fileuri = os.getcwd() + "/" + err_log_filename_prefix + self.ip + "_" + \
+		                         datetime.datetime.now().strftime("%Y%m%d-%H%M%S") + ".dat"
 		log.debug("self.error_log_fileuri : %s", self.error_log_fileuri)
 		self.error_log_file = open(self.error_log_fileuri, 'w')
 
-		#self.pixmap_pico = QPixmap(os.getcwd() + "/image/pico.png")
-		#self.label_image_pico = QLabel(self.widget)
-		#self.label_image_pico.setPixmap(self.pixmap_pico)
-		#self.gridlayout.addWidget(self.label_image_pico, 0, 0)
-
+		# self.pixmap_pico = QPixmap(os.getcwd() + "/image/pico.png")
+		# self.label_image_pico = QLabel(self.widget)
+		# self.label_image_pico.setPixmap(self.pixmap_pico)
+		# self.gridlayout.addWidget(self.label_image_pico, 0, 0)
 
 		self.gridlayout.addWidget(self.label_ip, 0, 0)
 		self.gridlayout.addWidget(self.label_id_info, 0, 1)
@@ -65,10 +67,8 @@ class Client_Info_Widget(QWidget):
 		self.gridlayout.addWidget(self.label_message_info, 2, 0, 2, 3)
 		self.gridlayout.addWidget(self.widget_client_image, 2, 4)
 
-
-
 	def set_error_msg(self, str):
-		current_time = "@" +datetime.datetime.now().strftime("%Y%m%d-%H%M%S") + "\n"
+		current_time = "@" + datetime.datetime.now().strftime("%Y%m%d-%H%M%S") + "\n"
 		str += current_time
 		self.error_log_file.write(str)
 		self.error_log_file.flush()
@@ -178,7 +178,6 @@ class Client_Image(QWidget):
 			self.label_image_lcd1602.setPixmap(self.pixmap_lcd1602)
 			return
 
-
 		if self.show_error is True:
 			if "pico_status" in self.error_part_list:
 				self.label_image_pico.setPixmap(self.pixmap_error_red)
@@ -201,6 +200,7 @@ class Client_Image(QWidget):
 			self.show_error = False
 		else:
 			self.show_error = True
+
 
 # class for scrollable label
 class ScrollLabel(QScrollArea):
@@ -225,14 +225,13 @@ class ScrollLabel(QScrollArea):
 		# creating label
 		self.label = QLabel(content)
 
-
 		# setting alignment to the text
 		self.label.setAlignment(Qt.AlignLeft | Qt.AlignTop)
 
 		# making label multi-line
 		self.label.setWordWrap(True)
 		self.label.setMinimumWidth(800)
-		#self.label_min_height = self.label.minimumHeight()
+		# self.label_min_height = self.label.minimumHeight()
 
 		# adding label to the layout
 		lay.addWidget(self.label)
@@ -243,5 +242,3 @@ class ScrollLabel(QScrollArea):
 		self.label.setFont(self._font)
 		self.label.setText(text)
 		self.label.setMinimumHeight(self.label.minimumHeight() + 100)
-
-

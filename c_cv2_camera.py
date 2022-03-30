@@ -80,7 +80,7 @@ class CV2Camera(QtCore.QThread):
                     if self.video_type == "h264":
                         self.cam = cv2.VideoCapture(self.video_loopback_dst)
                     else:
-                        log.debug("try to open tc358743")
+                        # log.debug("try to open tc358743")
                         # tc358743, VideoCapture here
                         self.cam = self.open_tc358743_cam()
                 time.sleep(1)
@@ -93,7 +93,7 @@ class CV2Camera(QtCore.QThread):
                     self.running = True
 
             if self.running is False:
-                log.debug("waiting for start to read")
+                # log.debug("waiting for start to read")
                 time.sleep(1)
                 continue
 
@@ -219,7 +219,7 @@ class CV2Camera(QtCore.QThread):
         list_dv_timings = dv_timings.split("\n")
 
         if 'fail' in list_dv_timings[0]:
-            log.debug("not connected")
+            # log.debug("not connected")
             connected = False
             return connected, width, height, fps
         else:

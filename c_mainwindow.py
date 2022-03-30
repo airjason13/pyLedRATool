@@ -74,7 +74,7 @@ class MainUi(QMainWindow):
             self.server_info[len(self.server_info) - 1].widget_server_image.error_alert_timer)
 
         self.gridlayout.addWidget(self.server_info[len(self.server_info) - 1],
-                                  self.server_info[len(self.server_info) - 1].id , 0, 3, 4)
+                                  self.server_info[len(self.server_info) - 1].id , 0, 3, 7)
 
         self.gridlayout.addWidget(self.label_check_period, 0, 5)
         self.gridlayout.addWidget(self.edit_check_period, 0, 6)
@@ -100,7 +100,7 @@ class MainUi(QMainWindow):
                 if ip == "":
                     log.debug("do not parse message from non ip")
                     return
-                if ip == self.ip :
+                if ip == self.ip:
                     #log.debug("server information")
                     # 如果訊息內含有本身server ip, msg在加上 hdmi fps
                     for s in self.server_info:
@@ -128,15 +128,18 @@ class MainUi(QMainWindow):
                                 str_error_info += "hdmi-in error,fps=" + str(cv2_fps) + ","
                     pass
                 else:
-                    #log.debug("ip : %s", ip)
+                    log.debug("ip : %s", ip)
                     if self.add_test_ip_or_not(ip) is True:
-                        client_info = Client_Info_Widget(ip, len(self.client_info), self.widget)
+                        client_info = Client_Info_Widget(ip, len(self.client_info) + 1, self.widget)
                         self.client_info.append(client_info)
                         self.error_check_timer.timeout.connect(
                             self.client_info[len(self.client_info) - 1].widget_client_image.error_alert_timer)
 
-                        self.gridlayout.addWidget(self.client_info[len(self.client_info) - 1],
-                                                  self.client_info[len(self.client_info) - 1].id + 1, 0)
+                        self.gridlayout.addWidget(self.client_info[len(self.client_info) - 1] ,
+                                                  self.client_info[len(self.client_info) - 1].id + 1 , 0, 1, 7)
+
+                        #self.gridlayout.addWidget(self.client_info[len(self.client_info) - 1],
+                        #                          self.client_info[len(self.client_info) - 1].id + 1, 0)
 
             elif str_list[i].startswith(TAG_PICO_STATUS):
                 if str_list[i].split("=")[1] == TAG_NG:
