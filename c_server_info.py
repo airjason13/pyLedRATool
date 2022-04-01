@@ -72,11 +72,22 @@ class Server_Info_Widget(QWidget):
 		self.cv2camera.signal_tc358743_loopback.connect(self.run_ffmpeg_loopback)
 
 		# write error log file
+		f = open(os.getcwd() + "/ra_log_index.txt", "r")
+		lines = f.read()
+
+		log.debug("lines = %s", lines)
+		log.debug("str_index = %s", str(lines).rstrip("\x00"))
+		str_index = str(lines).rstrip('\x00')
+		f.close()
 		self.error_log_file_uri = os.getcwd() + "/" + err_log_filename_prefix + self.ip + "_" + \
-		                          datetime.datetime.now().strftime("%Y%m%d-%H%M%S") + ".dat"
+		                          datetime.datetime.now().strftime("%Y%m%d-%H%M%S") + "_" + str_index + ".dat"
 		log.debug("self.error_log_file_uri : %s", self.error_log_file_uri)
 		self.error_log_file = open(self.error_log_file_uri, 'w')
-
+		f = open(os.getcwd() + "/ra_log_index.txt", "w")
+		str_index = str(int(str_index) + 1)
+		f.write(str_index)
+		f.flush()
+		f.close()
 		self.gridlayout.addWidget(self.label_ip, 0, 0)
 		self.gridlayout.addWidget(self.label_id_info, 0, 1)
 		self.gridlayout.addWidget(self.label_recv_count, 0, 2)
