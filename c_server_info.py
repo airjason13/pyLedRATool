@@ -74,10 +74,12 @@ class Server_Info_Widget(QWidget):
 		# write error log file
 		f = open(os.getcwd() + "/ra_log_index.txt", "r")
 		lines = f.read()
-
 		log.debug("lines = %s", lines)
-		log.debug("str_index = %s", str(lines).rstrip("\x00"))
-		str_index = str(lines).rstrip('\x00')
+		if len(lines) == 0:
+			str_index = 0
+		else:
+			log.debug("str_index = %s", str(lines).rstrip("\x00"))
+			str_index = str(lines).rstrip('\x00')
 		f.close()
 		self.error_log_file_uri = os.getcwd() + "/" + err_log_filename_prefix + self.ip + "_" + \
 		                          datetime.datetime.now().strftime("%Y%m%d-%H%M%S") + "_" + str_index + ".dat"
