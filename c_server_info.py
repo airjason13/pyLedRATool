@@ -70,7 +70,13 @@ class Server_Info_Widget(QWidget):
 		self.cv2camera.signal_get_rawdata.connect(self.getRaw)
 		self.cv2camera.signal_cv2_read_fail.connect(self.ffmpeg_qprocess_terminate)
 		self.cv2camera.signal_tc358743_loopback.connect(self.run_ffmpeg_loopback)
-
+		ra_log_index_file_uri = os.getcwd() + "/ra_log_index.txt"
+		if os.path.exists(ra_log_index_file_uri) is False:
+			f = open(os.getcwd() + "/ra_log_index.txt", "w")
+			str_index = str(0)
+			f.write(str_index)
+			f.flush()
+			f.close()
 		# write error log file
 		f = open(os.getcwd() + "/ra_log_index.txt", "r")
 		lines = f.read()

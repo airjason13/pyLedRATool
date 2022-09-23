@@ -67,7 +67,6 @@ class MainUi(QMainWindow):
         self.btn_check_period.setFixedWidth(100)
         self.btn_check_period.clicked.connect(self.set_check_period)
 
-
         server_info = Server_Info_Widget(self.ip, len(self.server_info), self.widget)
         self.server_info.append(server_info)
         self.error_check_timer.timeout.connect(
