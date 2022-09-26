@@ -86,7 +86,6 @@ class CV2Camera(QtCore.QThread):
                         # tc358743, VideoCapture here
                         self.cam = self.open_tc358743_cam()
                 time.sleep(1)
-                log.debug("self.cam.isOpened() : %d", self.cam.isOpened())
                 if self.cam is None or not self.cam.isOpened():
                     self.connect = False
                     self.running = False
@@ -97,8 +96,9 @@ class CV2Camera(QtCore.QThread):
             if self.running is False:
                 log.debug("waiting for start to read")
                 # self.signal_cv2_read_fail.emit()
-                self.cam.release()
-                self.cam = None
+                if self.cam is not None:
+                    self.cam.release()
+                    self.cam = None
                 time.sleep(1)
                 continue
 
@@ -119,6 +119,18 @@ class CV2Camera(QtCore.QThread):
                 self.cam = None
                 continue
                 # break
+
+            self.tc358743_connected, self.tc358743_width, self.tc358743_height, self.tc358743_fps \
+                = self.get_tc358743_dv_timing()
+            if self.tc358743_connected is False:
+                self.signal_cv2_read_fail.emit()
+                # self.v4l2_loopback_pid.terminate()
+                # self.v4l2_loopback_pid = None
+                if self.cam is not None:
+                    self.cam.release()
+                    self.cam = None
+                    continue
+
 
             '''tmp_connected, tmp_width, tmp_height, tmp_fps = self.get_tc358743_dv_timing()
             if tmp_connected is False or tmp_width != self.tc358743_width or tmp_height != self.tc358743_height or \

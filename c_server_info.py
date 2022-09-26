@@ -182,13 +182,9 @@ class Server_Info_Widget(QWidget):
 
 	def ffmpeg_qprocess_finished(self):
 		log.debug("ffmpeg_qprocess_finished")
-		# new
 
-		self.cv2camera = None
-		self.cv2camera = CV2Camera("/dev/video0", "UYUV")
-		self.cv2camera.signal_get_rawdata.connect(self.getRaw)
-		self.cv2camera.signal_cv2_read_fail.connect(self.ffmpeg_qprocess_terminate)
-		self.cv2camera.signal_tc358743_loopback.connect(self.run_ffmpeg_loopback)
+
+
 
 	def ffmpeg_qprocess_stdout(self):
 		if self.ffmpeg_qprocess is not None:
@@ -208,13 +204,7 @@ class Server_Info_Widget(QWidget):
 		self.ffmpeg_qprocess = None
 		self.ffmpeg_fps = 0
 
-		# new
-		# self.cv2camera.finished()
-		self.cv2camera = None
-		self.cv2camera = CV2Camera("/dev/video0", "UYUV")
-		self.cv2camera.signal_get_rawdata.connect(self.getRaw)
-		self.cv2camera.signal_cv2_read_fail.connect(self.ffmpeg_qprocess_terminate)
-		self.cv2camera.signal_tc358743_loopback.connect(self.run_ffmpeg_loopback)
+
 
 
 class Server_Image(QWidget):
