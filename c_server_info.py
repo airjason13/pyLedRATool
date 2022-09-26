@@ -71,10 +71,11 @@ class Server_Info_Widget(QWidget):
 		self.cv2camera.signal_cv2_read_fail.connect(self.ffmpeg_qprocess_terminate)
 		self.cv2camera.signal_tc358743_loopback.connect(self.run_ffmpeg_loopback)
 		ra_log_index_file_uri = os.getcwd() + "/ra_log_index.txt"
+		log.debug("ra_log_index_file_uri = %s", ra_log_index_file_uri)
 		if os.path.exists(ra_log_index_file_uri) is False:
 			f = open(os.getcwd() + "/ra_log_index.txt", "w")
-			str_index = str(0)
-			f.write(str_index)
+
+			f.write("0")
 			f.flush()
 			f.close()
 		# write error log file
@@ -90,7 +91,7 @@ class Server_Info_Widget(QWidget):
 		self.error_log_file_uri = os.getcwd() + "/" + err_log_filename_prefix + self.ip + "_" + \
 		                          datetime.datetime.now().strftime("%Y%m%d-%H%M%S") + "_" + str_index + ".dat"
 		log.debug("self.error_log_file_uri : %s", self.error_log_file_uri)
-		self.error_log_file = open(self.error_log_file_uri, 'w')
+		self.error_log_file = open(self.error_log_file_uri, 'w+')
 		f = open(os.getcwd() + "/ra_log_index.txt", "w")
 		str_index = str(int(str_index) + 1)
 		f.write(str_index)
@@ -181,6 +182,13 @@ class Server_Info_Widget(QWidget):
 
 	def ffmpeg_qprocess_finished(self):
 		log.debug("ffmpeg_qprocess_finished")
+		# new
+
+		self.cv2camera = None
+		self.cv2camera = CV2Camera("/dev/video0", "UYUV")
+		self.cv2camera.signal_get_rawdata.connect(self.getRaw)
+		self.cv2camera.signal_cv2_read_fail.connect(self.ffmpeg_qprocess_terminate)
+		self.cv2camera.signal_tc358743_loopback.connect(self.run_ffmpeg_loopback)
 
 	def ffmpeg_qprocess_stdout(self):
 		if self.ffmpeg_qprocess is not None:
@@ -199,6 +207,14 @@ class Server_Info_Widget(QWidget):
 		self.ffmpeg_qprocess.terminate()
 		self.ffmpeg_qprocess = None
 		self.ffmpeg_fps = 0
+
+		# new
+		# self.cv2camera.finished()
+		self.cv2camera = None
+		self.cv2camera = CV2Camera("/dev/video0", "UYUV")
+		self.cv2camera.signal_get_rawdata.connect(self.getRaw)
+		self.cv2camera.signal_cv2_read_fail.connect(self.ffmpeg_qprocess_terminate)
+		self.cv2camera.signal_tc358743_loopback.connect(self.run_ffmpeg_loopback)
 
 
 class Server_Image(QWidget):

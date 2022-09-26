@@ -38,6 +38,8 @@ class CV2Camera(QtCore.QThread):
         self.fps_timer.start(1000)
         self.fps = 0
         self.s_fps = str(self.fps)
+        os.environ['OPENCV_VIDEO_PRIORITY_MSMF'] = '0'
+        os.environ['OPENCV_V4L2_CAPTURE_OPTION'] = 'timeout:10'
         # self.no_fps_count = 0
         # 3秒沒有frame後準備重啟
         # self.reopen_threshold = 3
@@ -80,11 +82,11 @@ class CV2Camera(QtCore.QThread):
                     if self.video_type == "h264":
                         self.cam = cv2.VideoCapture(self.video_loopback_dst)
                     else:
-                        # log.debug("try to open tc358743")
+                        log.debug("try to open tc358743")
                         # tc358743, VideoCapture here
                         self.cam = self.open_tc358743_cam()
                 time.sleep(1)
-
+                log.debug("self.cam.isOpened() : %d", self.cam.isOpened())
                 if self.cam is None or not self.cam.isOpened():
                     self.connect = False
                     self.running = False
@@ -93,7 +95,10 @@ class CV2Camera(QtCore.QThread):
                     self.running = True
 
             if self.running is False:
-                # log.debug("waiting for start to read")
+                log.debug("waiting for start to read")
+                # self.signal_cv2_read_fail.emit()
+                self.cam.release()
+                self.cam = None
                 time.sleep(1)
                 continue
 
@@ -108,10 +113,12 @@ class CV2Camera(QtCore.QThread):
                 log.debug("Warning!!!")
                 self.connect = False
                 self.signal_cv2_read_fail.emit()
-                #self.v4l2_loopback_pid.terminate()
-                #self.v4l2_loopback_pid = None
+                # self.v4l2_loopback_pid.terminate()
+                # self.v4l2_loopback_pid = None
                 self.cam.release()
                 self.cam = None
+                continue
+                # break
 
             '''tmp_connected, tmp_width, tmp_height, tmp_fps = self.get_tc358743_dv_timing()
             if tmp_connected is False or tmp_width != self.tc358743_width or tmp_height != self.tc358743_height or \
