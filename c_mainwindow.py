@@ -19,8 +19,7 @@ import socket
 import platform
 import fcntl
 import struct
-import log_utils
-log = log_utils.logging_init(__file__)
+
 
 class MainUi(QMainWindow):
     def __init__(self):

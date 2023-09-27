@@ -1,16 +1,21 @@
 import platform
+import log_utils
+log = log_utils.logging_init(__file__)
 
-VERSION="20220921_A01"
-ZMQ_SERVER_PORT=17688
-TAG_OK="OK"
-TAG_NG="NG"
 
-TAG_PICO_STATUS="pico_status="
-TAG_TERMINUS_STATUS="terminus_status="
-TAG_ETH_STATUS="br0_status="
-TAG_LCD1602_STATUS="lcd1602_status="
-TAG_TEMP_STATUS="temp_status="
-TAG_THROTTLED_STATUS="throttled="
+VERSION = "20220921_A01"
+
+
+ZMQ_SERVER_PORT = 17688
+TAG_OK = "OK"
+TAG_NG = "NG"
+
+TAG_PICO_STATUS = "pico_status="
+TAG_TERMINUS_STATUS = "terminus_status="
+TAG_ETH_STATUS = "br0_status="
+TAG_LCD1602_STATUS = "lcd1602_status="
+TAG_TEMP_STATUS = "temp_status="
+TAG_THROTTLED_STATUS = "throttled="
 
 broadcast_port = 19999
 

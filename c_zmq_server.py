@@ -2,8 +2,7 @@ import zmq
 import sys
 from PyQt5.QtCore import QThread, pyqtSignal
 import time
-import log_utils
-log = log_utils.logging_init(__file__)
+from globa_def import *
 
 class ZMQ_Server(QThread):
 	signal_recv_message_ret = pyqtSignal(str)

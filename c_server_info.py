@@ -15,8 +15,6 @@ from c_cv2_camera import *
 import datetime
 import log_utils
 
-log = log_utils.logging_init(__file__)
-
 
 class Server_Info_Widget(QWidget):
 	def __init__(self, ip, id, parent_widget, **kwargs):

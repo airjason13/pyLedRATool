@@ -14,7 +14,7 @@ from globa_def import *
 import datetime
 import log_utils
 
-log = log_utils.logging_init(__file__)
+
 
 
 class Client_Info_Widget(QWidget):

@@ -7,7 +7,6 @@ from globa_def import *
 import platform
 import os
 
-log = log_utils.logging_init('net_utils')
 
 def get_ip_address():
     if platform.machine() in ('arm', 'arm64', 'aarch64'):

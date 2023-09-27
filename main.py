@@ -13,6 +13,7 @@ import os
 import time
 import globa_def
 
+
 def signal_handler(signum, frame):
     if signum == signal.SIGINT.value:
         print("QUIT!")
@@ -20,6 +21,7 @@ def signal_handler(signum, frame):
             gui.server_info[0].cv2camera.close_v4l2_loopback_stream()
         QApplication.quit()
         sys.exit(1)
+
 
 def parse_throttled_value( throttled_value):
     res = ""

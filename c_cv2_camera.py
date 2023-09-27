@@ -4,11 +4,7 @@ import time
 from PyQt5 import QtCore
 from PyQt5.QtCore import QTimer, QProcess
 import os
-
-import ffmpy_utils
-import log_utils
-
-log = log_utils.logging_init(__file__)
+from globa_def import *
 
 
 class CV2Camera(QtCore.QThread):
